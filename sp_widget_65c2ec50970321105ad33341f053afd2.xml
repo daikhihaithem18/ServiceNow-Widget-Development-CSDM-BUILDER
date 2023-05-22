@@ -1,0 +1,1660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload unload_date="2023-05-22 12:24:54">
+<sp_widget action="INSERT_OR_UPDATE">
+<category>custom</category>
+<client_script><![CDATA[
+function init($scope) {
+	
+var c = this;   
+	
+	
+	
+	//show smal popup
+	
+
+	c.server.update().then(function(data){
+
+		
+		
+$scope.showSmallPopup = function(event, name) {
+	c.data.jsonapprovalname=name;
+
+    //  $scope.popupContent ="STATE : NOT PUBLISHED/DRAFT";
+ const jsonstateArray = Object.values(data.jsonstate);
+
+  // Loop through jsonstateArray to find the matching name
+for (let i = 0; i < jsonstateArray.length; i++) {
+  if (jsonstateArray[i].name === name) {
+    $scope.stateColor = jsonstateArray[i].state === 'PUBLISHED' ? 'green' : 'red';
+    $scope.popupContent = 'STATE : ' + jsonstateArray[i].state;
+    break;
+  }
+}
+	
+	
+	
+  const smallPopup = document.getElementById('smallPopup');
+
+  smallPopup.style.display = 'block';
+  smallPopup.style.top = `${event.clientY + 20}px`;
+  smallPopup.style.left = `${event.clientX}px`;
+
+
+	};
+	});
+    $scope.hideSmallPopup = function() {
+      const smallPopup = document.getElementById('smallPopup');
+      smallPopup.style.display = 'none';
+    };
+
+	
+	
+//Mapping
+	
+
+	//Mapping or Publish main function 
+	
+	
+ $scope.Publish=function(data) 	 {
+	 
+ save ();
+  var model = JSON.parse (document.getElementById("mySavedModel").value);
+
+
+	c.data.elements = [
+ //array 
+    {
+    //object
+    
+    },
+    {
+        
+    }
+];
+	 
+
+// here we map all the nodes names and there Descriptions
+c.data.elements.length = 0;
+	 
+	 
+	 
+for (var i=0;i<model.nodeDataArray.length;i++) {
+
+	c.data.elements[i]=model.nodeDataArray[i];
+	
+
+
+
+}
+	 
+$scope.elements = c.data.elements;	 
+
+
+
+
+//here we start mapping the relations between all nodes
+	 
+	
+			
+			
+				 	 
+	
+	 
+	  function findNodeDescription(key){
+	
+
+	
+	var model = JSON.parse (document.getElementById("mySavedModel").value);
+	
+	for (var i=0;i<model.nodeDataArray.length;i++) {
+	
+	
+	if (model.nodeDataArray[i].key==key){
+		
+
+		
+return model.nodeDataArray[i].Description;
+		
+	}}
+	
+ }
+	 
+	 
+	 
+	  
+	  function findNodeTitle(key){
+	
+
+	
+	var model = JSON.parse (document.getElementById("mySavedModel").value);
+	
+	for (var i=0;i<model.nodeDataArray.length;i++) {
+	
+	
+	if (model.nodeDataArray[i].key==key){
+		
+
+		
+return model.nodeDataArray[i].title;
+		
+	}}
+	
+ }
+	 
+
+
+
+
+	 
+	 
+ 
+
+
+	 
+			c.server.update().then(function(data){
+				
+//0function find node sysid
+function findsysid (node){			
+		 	for (var i=0;i<c.data.message.length;i++){
+		
+	
+if (node==c.data.message[i].Description)
+	return c.data.message[i].sysid;
+	 
+	 }		 
+			}
+				
+				
+//function find type of linking
+
+function findtyperelationname(node1Title,node2Title){
+	
+	
+	
+	
+	switch (node1Title+node2Title) {
+	
+
+	
+		case "Business CapabilityBusiness Application": c.data.linktype= "Provided By";break;
+		case "Business CapabilityBusiness Service":c.data.linktype= "Provided By";break;	
+	case "Business ApplicationInformation Object":c.data.linktype= "Uses";break;	
+	//case "Business ApplicationBusiness Application":c.data.linktype= "uses reference attribute";break;	
+		case "Business ApplicationApplication Service":c.data.linktype= "Consumes";break;	
+		case "Application ServiceApplication Service":c.data.linktype= "Depends on";break;
+case "Application ServiceApplication":c.data.linktype= "Depends on";break;
+case "ApplicationInfrastructure CIs":c.data.linktype= "Runs on";break;
+//case "Technical ServiceTechnical Service Offering":c.data.linktype= "uses reference attribute";break;		
+case "Technical Service OfferingApplication Service":c.data.linktype= "Contains";break;	
+case "Technical Service OfferingDynamic CI Group":c.data.linktype= "Contains";break;					
+//case "Dynamic CI GroupInfrastructure CIs":c.data.linktype= "Uses related list";break;					
+//case "Service PortfolioBusiness Service":c.data.linktype= "uses reference attribute";break;					
+case "Business Service OfferingApplication Service":c.data.linktype= "Depends on";break;							
+	
+	
+	
+	
+	
+	}
+
+	return c.data.linktype;
+
+
+	
+}		
+				
+				
+	c.data.nodelinking=[];		
+	
+		for (var i=0;i<model.linkDataArray.length;i++){
+			
+		 		c.data.obj={};
+			
+ var nodeFrom= model.linkDataArray[i].from;
+			
+					 var nodeTo= model.linkDataArray[i].to;
+			
+		var node1Title = findNodeTitle (nodeFrom);
+
+		 var node2Title = findNodeTitle (nodeTo);		
+				
+	var node1 = findNodeDescription (nodeFrom);
+
+		 var node2 = findNodeDescription (nodeTo);
+			
+			
+	
+		
+		
+
+c.data.obj.parent=findsysid (node1);
+c.data.obj.child=	findsysid (node2);
+c.data.obj.type_name = findtyperelationname(node1Title, node2Title);
+c.data.nodelinking[i] = c.data.obj;
+
+			
+		
+		}
+	 
+
+	
+	c.server.update().then(function(data){
+
+ c.data= {};
+			
+})	
+
+		 	
+
+
+})
+
+	 
+
+			
+
+	 
+	 
+		
+	  }
+//function Import data	
+
+	function showPopup() {
+		
+			c.server.update().then(function(data){
+
+
+  var popup = document.getElementById("myPopup");
+				
+						
+  popup.style.display = "block";
+
+				
+		
+})
+}
+
+$scope.draftJsonData = "{}";
+	
+ $scope.showjson=function(approvaljsoncode,approvalname) 	 {
+
+document.getElementById("mySavedModel").value= approvaljsoncode;
+		
+		load ();
+		
+		  document.getElementById("myPopup").style.display = "none";
+		
+	 
+	c.data.showenDiagramName= approvalname;
+	 
+	   $scope.draftDiagramName =approvalname;
+	   $scope.draftJsonData = approvaljsoncode;
+	
+	 
+
+	}
+	
+						 	
+	//Main function Import data	
+	
+ $scope.Drafts=function(data) {		
+
+	 showPopup()
+		
+}
+	
+	//function Export data	
+	
+
+
+	 $scope.Sauvegarde=function(data) {	
+		 
+		 		
+		 
+		 save();
+
+		  let diagram_name = prompt("Write Diagram name to save it :");
+		 
+		 if (diagram_name != "") {
+			 
+		 c.data.textareaData=document.getElementById("mySavedModel").value;	
+c.data.dname=diagram_name;
+	
+	c.server.update().then(function(data){
+
+ c.data = {};
+})
+			}
+}
+	
+	
+		//sauvegarde Diagram and Update the CI
+	  function findNodeDescription2(key){
+	
+
+	
+	var model = JSON.parse ($scope.draftJsonData);
+	
+	for (var i=0;i<model.nodeDataArray.length;i++) {
+	
+	
+	if (model.nodeDataArray[i].key==key){
+		
+
+		
+return model.nodeDataArray[i].Description;
+		
+	}}
+	
+ }
+	
+	
+				
+
+
+		
+
+
+	
+function compareDiagrams(json1, json2) {
+  const deletedRelations = [];
+
+  json2.linkDataArray.forEach((relation2) => {
+    const relation1 = json1.linkDataArray.find(
+      (relation1) =>
+        relation1.from === relation2.from && relation1.to === relation2.to
+    );
+
+    if (!relation1) {
+      // The relation in json2 is not found in json1, which means it has been deleted.
+      deletedRelations.push(relation2);
+    }
+  });
+
+  return {
+    deletedRelations,
+  };
+}
+
+$scope.SauvegardeAndUpdateCi = function (data) {
+    
+	save();
+	let diagram_name;
+	
+	if (!$scope.draftDiagramName) {
+	
+		diagram_name = prompt("Write Diagram name to save it :");
+			 if (diagram_name != "") {
+			 
+		 c.data.textareaData=document.getElementById("mySavedModel").value;	
+c.data.dname=diagram_name;
+	c.server.update().then(function(data){
+
+ c.data = {};
+})
+			}
+  c.data.jsonState = "PUBLISHED";
+    $scope.Publish();
+    c.server.update().then(function (data) {
+        c.data = {};
+    });
+		
+	
+	}
+	else {
+     diagram_name = $scope.draftDiagramName;
+
+	
+	
+    if (diagram_name != "") {
+        c.data.textareaData = document.getElementById("mySavedModel").value;
+        c.data.dname = diagram_name;
+        c.server.update().then(function (data) {
+            c.data = {};
+        });
+    }
+
+
+    const currentJson = JSON.parse(document.getElementById("mySavedModel").value);
+    const draftJsonObj = JSON.parse($scope.draftJsonData);
+    const modifications = compareDiagrams(currentJson, draftJsonObj);
+
+   
+    let deleteRelations = [];
+	
+    c.data.jsonState = "PUBLISHED";
+    $scope.Publish();
+    c.server.update().then(function (data) {
+        c.data = {};
+    });
+
+    function processDeletedRelation(index) {
+        if (index >= modifications.deletedRelations.length) {
+            c.data.deleteRelations = deleteRelations;
+
+            if (c.data.deleteRelations.length > 0) {
+             
+                c.server.update().then(function (data) {
+                    c.data = {};
+                });
+            } else {
+
+            }
+
+            return;
+        }
+
+        const deletedRelation = modifications.deletedRelations[index];
+        var node1 = findNodeDescription2(deletedRelation.from);
+        var node2 = findNodeDescription2(deletedRelation.to);
+
+        var model = draftJsonObj;
+
+        c.data.elements = [];
+
+      
+        c.data.elements.length = 0;
+
+        for (var j = 0; j < model.nodeDataArray.length; j++) {
+            c.data.elements[j] = model.nodeDataArray[j];
+        }
+
+        c.server.update().then(function (data) {
+            function findsysid(node) {
+                for (var i = 0; i < c.data.message.length; i++) {
+                    if (node == c.data.message[i].Description)
+                        return c.data.message[i].sysid;
+                }
+            }
+
+            c.data.parentSysId = findsysid(node1);
+            c.data.childSysId = findsysid(node2);
+
+            deleteRelations.push({
+                parentSysId: c.data.parentSysId,
+                childSysId: c.data.childSysId,
+            });
+
+            processDeletedRelation(index + 1);
+        });
+    }
+
+    processDeletedRelation(0);
+
+}}
+	
+
+//Function that can change link type between two node automatically
+
+
+function changelinkformat() {
+
+    save();
+  
+  
+  
+    var data = JSON.parse(myDiagram.model.toJson());
+  
+  
+  for (var i=0;i<data.linkDataArray.length;i++) {
+  
+  
+  var FromNodeNmbre= data.linkDataArray[i].from;
+  
+  var ToNodeNmbre = data.linkDataArray[i].to;
+  
+  
+  var NodeName1 = FindNodeName (FromNodeNmbre);
+  
+  var NodeName2 =  FindNodeName (ToNodeNmbre);
+  
+
+  
+  
+  if (ruleschangelinkformat (NodeName1,NodeName2)){
+  
+  
+  
+    data.linkDataArray[i].dash_array=[6,3];
+  
+    var string =JSON.stringify( data);
+  
+    document.getElementById("mySavedModel").value=string;
+  
+    load ();
+  
+  
+  }
+
+    }
+  }
+  
+  
+  function  FindNodeName (FromNodeNmbre) {
+  
+    var data = JSON.parse(myDiagram.model.toJson());
+  
+    for (var j=0;j<data.nodeDataArray.length;j++) {
+  
+  
+       if (FromNodeNmbre == data.nodeDataArray[j].key)  return data.nodeDataArray[j].title;
+  
+    
+  
+  
+  }
+  }
+  
+  
+  function ruleschangelinkformat (NodeName1,NodeName2) {
+  
+  
+  var ch = NodeName1+NodeName2;
+  
+  switch (ch) {
+  
+  
+    case "Business ApplicationBusiness Application" : return true; 
+
+    case "Technical ServiceTechnical Service Offering" : return true; 
+
+    case "Dynamic CI GroupInfrastructure CIs" : return true;
+
+    case "Service PortfolioBusiness Service" : return true;
+
+    case "Business ServiceBusiness Service Offering" : return true;
+
+
+  
+  
+  }
+      
+  }
+
+
+
+  //Function that can delete link between two nodes if user doesnt respect linking rules with an alert
+
+
+
+  function banlinking () {
+
+
+    save();
+  
+  
+  
+    var data = JSON.parse(myDiagram.model.toJson());
+  
+  
+  for (var i=0;i<data.linkDataArray.length;i++) {
+  
+  
+  var FromNodeNmbre= data.linkDataArray[i].from;
+  
+  var ToNodeNmbre = data.linkDataArray[i].to;
+  
+  
+  var NodeName1 = FindNodeName (FromNodeNmbre);
+  
+  var NodeName2 =  FindNodeName (ToNodeNmbre);
+  
+
+  
+  
+  if (ruleschangebanlinking (NodeName1,NodeName2)){
+  
+  
+    delete data.linkDataArray[i];
+
+
+
+    
+
+    var string =JSON.stringify( data);
+
+
+    var newStr = string.replace('null','');
+
+    var newStr1 = newStr.replace(',]',']');
+
+    var newStr2=newStr1.replace('[,','[');
+    
+    
+
+    alert( "Its forbidden to link between "+NodeName1+" and "+ NodeName2)
+  
+    document.getElementById("mySavedModel").value=newStr2;
+  
+    load ();
+  
+  }
+
+    }
+  }
+
+
+
+
+
+// Define rules for banlinking here 
+  
+    
+  function ruleschangebanlinking (NodeName1,NodeName2) {
+  
+  
+    var ch = NodeName1+NodeName2;
+    
+    switch (ch) {
+    
+    
+      case "DesignDesign" : return true; 
+
+  
+    
+    
+    }
+        
+    }
+
+
+
+	
+
+  // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
+  // For details, see https://gojs.net/latest/intro/buildingObjects.html
+  const $ = go.GraphObject.make;  // for conciseness in defining templates
+
+  var nodeSelectionAdornmentTemplate =
+  $(go.Adornment, "Auto",
+    $(go.Shape, { fill: null, stroke: "deepskyblue", strokeWidth: 1.5, strokeDashArray: [4, 2] }),
+    $(go.Placeholder)
+  );
+
+  var nodeResizeAdornmentTemplate =
+  $(go.Adornment, "Spot",
+    { locationSpot: go.Spot.Right },
+    $(go.Placeholder),
+    $(go.Shape, { alignment: go.Spot.TopLeft, cursor: "nw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+    $(go.Shape, { alignment: go.Spot.Top, cursor: "n-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+    $(go.Shape, { alignment: go.Spot.TopRight, cursor: "ne-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+
+    $(go.Shape, { alignment: go.Spot.Left, cursor: "w-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+    $(go.Shape, { alignment: go.Spot.Right, cursor: "e-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+
+    $(go.Shape, { alignment: go.Spot.BottomLeft, cursor: "se-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+    $(go.Shape, { alignment: go.Spot.Bottom, cursor: "s-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+    $(go.Shape, { alignment: go.Spot.BottomRight, cursor: "sw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" })
+  );
+
+var nodeRotateAdornmentTemplate =
+  $(go.Adornment,
+    { locationSpot: go.Spot.Center, locationObjectName: "ELLIPSE" },
+    $(go.Shape, "Ellipse", { name: "ELLIPSE", cursor: "pointer", desiredSize: new go.Size(7, 7), fill: "lightblue", stroke: "deepskyblue" }),
+    $(go.Shape, { geometryString: "M3.5 7 L3.5 30", isGeometryPositioned: true, stroke: "deepskyblue", strokeWidth: 1.5, strokeDashArray: [4, 2] })
+  );
+
+
+    
+  // Define a function for creating a "port" that is normally transparent.
+  // The "name" is used as the GraphObject.portId, the "spot" is used to control how links connect
+  // and where the port is positioned on the node, and the boolean "output" and "input" arguments
+  // control whether the user can draw links from or to the port.
+  function makePort(name, spot, output, input) {
+    // the port is basically just a small transparent circle
+    return $(go.Shape, 
+      {
+        fill: null,  // not seen, by default; set to a translucent gray by showSmallPorts, defined below
+        stroke: null,
+        desiredSize: new go.Size(7, 7),
+        alignment: spot,  // align the port on the main Shape
+        alignmentFocus: spot,  // just inside the Shape
+        portId: name,  // declare this object to be a "port"
+        fromSpot: spot, toSpot: spot,  // declare where links may connect at this port
+        fromLinkable: output, toLinkable: input,  // declare whether the user may draw links to/from here
+        cursor: "pointer"  // show a different cursor to indicate potential link point
+      });
+  }
+
+
+  
+  var simpletemplate =
+  $(go.Node, "Spot",
+    { locationSpot: go.Spot.Center },
+    new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+    { selectable: true, selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
+    { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
+    { rotatable: true, rotateAdornmentTemplate: nodeRotateAdornmentTemplate },
+    new go.Binding("angle").makeTwoWay(),
+    // the main object is a Panel that surrounds a TextBlock with a Shape
+    $(go.Panel, "Auto",
+    {  maxSize: new go.Size(400, 30) },
+    // the two TextBlocks in column 0 both stretch in width
+    // but align on the left side
+    $(go.RowColumnDefinition,
+      {
+        column: 0,
+        stretch: go.GraphObject.Horizontal,
+        alignment: go.Spot.Left
+      }),
+      { name: "PANEL" },
+      new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
+      $(go.Shape, "RoundedRectangle",  // default figure
+        {
+          portId: "", // the default port: if no spot on link data, use closest side
+          fromLinkable: true, toLinkable: true, cursor: "pointer",
+      
+          strokeWidth: 0,
+         
+        
+        },
+ 
+        new go.Binding("fill", "color")),
+  
+  
+      $(go.TextBlock,
+        {
+          
+            
+        row: 0, column:1,
+        maxSize: new go.Size(200, 30),
+        font: "8pt sans-serif",
+        isMultiline:true,
+        editable: true,
+      
+        },
+  
+        new go.Binding("text", "title").makeTwoWay()),
+
+  
+      ),
+      
+      
+         // four small named ports, one on each side:
+         makePort("T", go.Spot.Top, false, true),
+         makePort("L", go.Spot.Left, true, true),
+         makePort("R", go.Spot.Right, true, true),
+         makePort("B", go.Spot.Bottom, true, false),
+         { // handle mouse enter/leave events to show/hide the ports
+          mouseEnter: (e, node) => showSmallPorts(node, true),
+          mouseLeave: (e, node) => showSmallPorts(node, false)
+        }
+          
+      
+      );
+
+
+
+      //Detailtemplate !!!!!
+
+
+  var detailtemplate =
+  $(go.Node, "Spot",
+    { locationSpot: go.Spot.Center },
+    new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+    { selectable: true, selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
+    { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
+    { rotatable: true, rotateAdornmentTemplate: nodeRotateAdornmentTemplate },
+    new go.Binding("angle").makeTwoWay(),
+    // the main object is a Panel that surrounds a TextBlock with a Shape
+    $(go.Panel, "Auto",
+    { margin: 2, maxSize: new go.Size(200, 100) },
+    // the two TextBlocks in column 0 both stretch in width
+    // but align on the left side
+    $(go.RowColumnDefinition,
+      {
+        column: 0,
+        stretch: go.GraphObject.Horizontal,
+        alignment: go.Spot.Left
+      }),
+      { name: "PANEL" },
+      new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
+      $(go.Shape, "RoundedRectangle",  // default figure
+        {
+          portId: "", // the default port: if no spot on link data, use closest side
+          fromLinkable: true, toLinkable: true, cursor: "pointer",
+      
+          strokeWidth: 0,
+         
+        
+        },
+ 
+        new go.Binding("fill", "color")),
+  
+  
+      $(go.TextBlock,
+        {
+          
+          font: "bold 7pt Helvetica, Arial, sans-serif",
+          margin: 10,
+          maxSize: new go.Size(200, 90),
+      
+          editable: false,
+          isMultiline:true,
+          height: 70,
+      
+        },
+  
+        new go.Binding("text", "title").makeTwoWay()),
+  
+    $(go.TextBlock,
+      {
+        margin: 20,
+        row: 30, column:1,
+        maxSize: new go.Size(100, 90),
+        font: "8pt sans-serif",
+        isMultiline:true,
+        editable: true,
+        
+  
+      },
+      new go.Binding("text", "Description").makeTwoWay()),
+  
+  
+  
+   
+  
+      ),
+      
+      
+         // four small named ports, one on each side:
+         makePort("T", go.Spot.Top, false, true),
+         makePort("L", go.Spot.Left, true, true),
+         makePort("R", go.Spot.Right, true, true),
+         makePort("B", go.Spot.Bottom, true, false),
+         { // handle mouse enter/leave events to show/hide the ports
+          mouseEnter: (e, node) => showSmallPorts(node, true),
+          mouseLeave: (e, node) => showSmallPorts(node, false)
+        }
+          
+      
+      );
+  
+  
+
+      function showSmallPorts(node, show) {
+        node.ports.each(port => {
+          if (port.portId !== "") {  // don't change the default port, which is the big shape
+            port.fill = show ? "rgba(0,0,0,.3)" : null;
+          }
+        });
+      }
+
+  
+  
+
+
+  var templmap = new go.Map();
+
+templmap.add("simple", simpletemplate);
+templmap.add("detailed", detailtemplate);
+
+
+
+ myTreeDiagram =
+        $(go.Diagram, "myTree",
+          {
+			        "draggingTool.dragsTree": true,
+            allowMove: false,
+     
+            allowDelete: true,
+            allowHorizontalScroll: false,
+            layout:
+              $(go.TreeLayout,
+                {
+                  alignment: go.TreeLayout.AlignmentStart,
+                  angle: 0,
+                  compaction: go.TreeLayout.CompactionNone,
+                  layerSpacing: 16,
+                  layerSpacingParentOverlap: 1,
+                  nodeIndentPastParent: 1.0,
+                  nodeSpacing: 0,
+                  setsPortSpot: false,
+                  setsChildPortSpot: false
+                }),
+				
+				 "ClipboardPasted": function (e) {
+        var toDelete = [];
+        e.subject.each(function (part) {
+          if (part instanceof go.Node && !part.data.parent) {
+            toDelete.push(part);
+          }
+        });
+        for (var i = 0; i < toDelete.length; i++) {
+          myTreeDiagram.remove(toDelete[i]);
+        }
+      },
+				
+				
+				
+				 "SelectionMoved": function(e) {
+          myTreeDiagram.selection.each(function(node) {
+            if (node.category === "simple") {
+              myTreeDiagram.model.setCategoryForNodeData(node.data, "detailed");
+            }
+          });
+        },
+				
+				
+		
+          });
+		  
+(function() {
+  var originalCopyToClipboard = myTreeDiagram.commandHandler.copyToClipboard;
+  myTreeDiagram.commandHandler.copyToClipboard = function(coll) {
+    var filtered = new go.Set(/*...go.Part*/);
+    coll.each(function(part) {
+      if (part instanceof go.Node && part.data.parent) {
+        filtered.add(part);
+      }
+    });
+    originalCopyToClipboard.call(myTreeDiagram.commandHandler, filtered);
+  };
+})();
+
+myTreeDiagram.nodeTemplate =
+  $(go.Node,
+    {
+      // Allow the node to be dragged if canDrag is true, otherwise disallow dragging
+      dragComputation: function (node, pt) {
+        if (node.data.canDrag) {
+          return new go.Point(Math.floor(pt.x), Math.floor(pt.y));
+        } else {
+          return null;
+        }
+      }
+    },
+
+    $("TreeExpanderButton",
+      {
+        "_treeExpandedFigure": "LineDown",
+        "_treeCollapsedFigure": "LineRight",
+        "ButtonBorder.fill": "whitesmoke",
+        "ButtonBorder.stroke": null,
+        "_buttonFillOver": "rgba(0,128,255,0.25)",
+        "_buttonStrokeOver": null
+      },
+      new go.Binding("visible", "parent", p => p !== undefined)),
+    $(go.Panel, "Horizontal",
+      { position: new go.Point(18, 0) },
+      new go.Binding("background", "isSelected", s => s ? "lightblue" : "white").ofObject(),
+      $(go.Picture,
+        {
+          width: 18, height: 18,
+          margin: new go.Margin(0, 4, 0, 0),
+          imageStretch: go.GraphObject.Uniform
+        }
+      ),
+      $(go.TextBlock,
+        { font: '9pt Verdana, sans-serif', editable: false },
+        new go.Binding("text", "title").makeTwoWay(),
+        new go.Binding("isUnderline", "", function() { return false; }))
+    )
+  );
+
+      // without lines
+      myTreeDiagram.linkTemplate = $(go.Link);
+
+      // // with lines
+      // myDiagram.linkTemplate =
+      //   $(go.Link,
+      //     { selectable: false,
+      //       routing: go.Link.Orthogonal,
+      //       fromEndSegmentLength: 4,
+      //       toEndSegmentLength: 4,
+      //       fromSpot: new go.Spot(0.001, 1, 7, 0),
+      //       toSpot: go.Spot.Left },
+      //     $(go.Shape,
+      //       { stroke: 'gray', strokeDashArray: [1,2] }));
+
+      // create a random tree
+	  
+	  
+	  
+var nodeDataArray = [
+
+  { key: "Design" , title: "Design" },
+  
+   { title: "Business Capability", parent: "Design", canDrag: true },
+  { title: "Business Application", parent: "Design" },
+  { title: "Information Object", parent: "Design" },
+  
+  {key: "Manage Technical" , title: "Manage Technical"},
+  
+    { title: "Technical Service", parent: "Manage Technical" },
+  { title: "Technical Service Offering", parent: "Manage Technical" },
+  { title: "Application Service", parent: "Manage Technical" },
+    { title: "Dynamic CI Group", parent: "Manage Technical" },
+  { title: "Application", parent: "Manage Technical" },
+  { title: "Infrastructure CIs", parent: "Manage Technical" },
+  
+  { key: "Consume" , title: "Consume"},
+  
+  
+  { title: "Service Portfolio", parent: "Consume"},
+  { title: "Business Service", parent: "Consume"},
+  { title: "Business Service Offering", parent: "Consume"},
+  { title: "Request Catalog", parent: "Consume"},
+  
+    { key: "Foundation" , title: "Foundation" },
+   { key: "Build" , title: "Build" },
+    {key: "Reference" ,  title: "Reference" },
+  
+];
+
+myTreeDiagram.model = new go.TreeModel(nodeDataArray);
+
+
+
+
+
+          
+
+    
+
+     
+
+  
+
+
+
+myDiagram =
+$(go.Diagram, "myDiagramDiv",  // must name or refer to the DIV HTML element
+  {
+    "LinkDrawn": function(e) {
+      var link = e.subject;
+      link.isSelected = false;
+      var orig = link.toShortLength;
+      link.toShortLength = 2;
+      var anim = new go.Animation();
+      var sw = link.path.strokeWidth;
+      anim.add(link.path, "strokeWidth", sw, sw+5);
+      anim.add(link.elt(1), "strokeWidth", sw, sw+5);
+      anim.reversible = true;
+      anim.finished = function(a) { link.toShortLength = orig; link.isSelected = true; };
+      anim.start();
+      banlinking();
+      changelinkformat();
+    },
+    nodeTemplateMap: templmap,
+    grid: $(go.Panel, "Grid",
+      $(go.Shape, "LineH", { stroke: "lightgray", strokeWidth: 0.5 }),
+      $(go.Shape, "LineH", { stroke: "gray", strokeWidth: 0.5, interval: 10 }),
+      $(go.Shape, "LineV", { stroke: "lightgray", strokeWidth: 0.5 }),
+      $(go.Shape, "LineV", { stroke: "gray", strokeWidth: 0.5, interval: 10 })
+    ),
+    "draggingTool.dragsLink": true,
+    "draggingTool.isGridSnapEnabled": true,
+    "linkingTool.isUnconnectedLinkValid": true,
+    "linkingTool.portGravity": 20,
+    "relinkingTool.isUnconnectedLinkValid": true,
+    "relinkingTool.portGravity": 20,
+    "relinkingTool.fromHandleArchetype":
+      $(go.Shape, "Diamond", { segmentIndex: 0, cursor: "pointer", desiredSize: new go.Size(8, 8), fill: "tomato", stroke: "darkred" }),
+    "relinkingTool.toHandleArchetype":
+      $(go.Shape, "Diamond", { segmentIndex: -1, cursor: "pointer", desiredSize: new go.Size(8, 8), fill: "darkred", stroke: "tomato" }),
+    "linkReshapingTool.handleArchetype":
+      $(go.Shape, "Diamond", { desiredSize: new go.Size(7, 7), fill: "lightblue", stroke: "deepskyblue" }),
+    "rotatingTool.handleAngle": 270,
+    "rotatingTool.handleDistance": 30,
+    "rotatingTool.snapAngleMultiple": 15,
+    "rotatingTool.snapAngleEpsilon": 15,
+    "undoManager.isEnabled": true
+  });
+
+
+  
+
+// when the document is modified, add a "*" to the title and enable the "Save" button
+myDiagram.addDiagramListener("Modified", e => {
+  var button = document.getElementById("SaveButton");
+  if (button) button.disabled = !myDiagram.isModified;
+  var idx = document.title.indexOf("*");
+  if (myDiagram.isModified) {
+    if (idx < 0) document.title += "*";
+  } else {
+    if (idx >= 0) document.title = document.title.slice(0, idx);
+  }
+  });
+
+  var linkSelectionAdornmentTemplate =
+    $(go.Adornment, "Link",
+      $(go.Shape,
+        // isPanelMain declares that this Shape shares the Link.geometry
+        { isPanelMain: true, fill: null, stroke: "deepskyblue", strokeWidth: 0 })  // use selection object's strokeWidth
+    );
+
+  myDiagram.linkTemplate =
+    $(go.Link,  // the whole link panel
+
+      { selectable: true, selectionAdornmentTemplate: linkSelectionAdornmentTemplate },
+      { relinkableFrom: true, relinkableTo: true, reshapable: true },
+      {
+        routing: go.Link.AvoidsNodes,
+        curve: go.Link.JumpOver,
+        corner: 5,
+        toShortLength: 4
+      },
+      new go.Binding("points").makeTwoWay(),
+      $(go.Shape,  // the link path shape
+     
+      
+        { 
+          
+        
+          
+          isPanelMain: true, strokeWidth: 2 }
+          , new go.Binding('strokeDashArray', 'dash_array')),
+
+
+
+      $(go.Shape,  // the arrowhead
+        { toArrow: "Standard", stroke: null }),
+      $(go.Panel, "Auto",
+        new go.Binding("visible", "isSelected").ofObject(),
+        $(go.Shape, "RoundedRectangle",  // the link shape
+          { fill: "#F8F8F8", stroke: null }),
+
+   
+          
+        
+        $(go.TextBlock,
+          {
+            textAlign: "center",
+            font: "10pt helvetica, arial, sans-serif",
+            stroke: "#919191",
+            margin: 2,
+            minSize: new go.Size(10, NaN),
+            editable: true
+          },
+          new go.Binding("text").makeTwoWay()),
+         
+
+             
+
+      
+          )
+
+
+      
+    );
+
+myDiagram.addDiagramListener("ClipboardPasted", function (e) {
+  e.subject.each(function (part) {
+	  
+	  var module = document.getElementById("mySavedModel").value;
+    if (part instanceof go.Node) {
+		
+		
+	if ((part.data.title=="Business Capability") ||(part.data.title=="Business Application")||(part.data.title=="Information Object")){  part.data.color = "lightskyblue";			  
+  part.category = "detailed";
+			  part.data.category = "detailed";
+		    part.data.Description ="Description";
+		     part.data.size ="120 80";
+		   myDiagram.model.updateTargetBindings(part.data);   }
+		
+		     
+		if ((part.data.title=="Technical Service") ||(part.data.title=="Infrastructure CIs") ||(part.data.title=="Application") ||(part.data.title=="Dynamic CI Group")||(part.data.title=="Technical Service Offering")||(part.data.title=="Application Service")){  part.data.color = "#ffac24";
+ part.category = "detailed";
+			  part.data.category = "detailed";
+		    part.data.Description ="Description";
+		     part.data.size ="120 80";
+		   myDiagram.model.updateTargetBindings(part.data); 		}	
+		
+		
+if ((part.data.title=="Service Portfolio") ||(part.data.title=="Request Catalog") ||(part.data.title=="Business Service")||(part.data.title=="Business Service Offering")){  part.data.color = "#089454";
+ part.category = "detailed";
+			  part.data.category = "detailed";
+		    part.data.Description ="Description";
+		     part.data.size ="120 80";
+		   myDiagram.model.updateTargetBindings(part.data); 	}
+				
+
+	
+	
+
+
+ 
+	  
+		  
+		 
+		   
+
+   
+    }
+  });
+});
+
+
+
+
+  load();  // load an initial diagram from some JSON text
+
+
+
+
+
+
+
+      
+}
+
+
+// Show the diagram's model in JSON format that the user may edit
+function save() {
+  saveDiagramProperties();  // do this first, before writing to JSON
+  document.getElementById("mySavedModel").value = myDiagram.model.toJson();
+  myDiagram.isModified = false;
+}
+function load() {
+  myDiagram.model = go.Model.fromJson(document.getElementById("mySavedModel").value);
+  loadDiagramProperties();  // do this after the Model.modelData has been brought into memory
+}
+
+function saveDiagramProperties() {
+  myDiagram.model.modelData.position = go.Point.stringify(myDiagram.position);
+}
+function loadDiagramProperties(e) {
+  // set Diagram.initialPosition, not Diagram.position, to handle initialization side-effects
+  var pos = myDiagram.model.modelData.position;
+  if (pos) myDiagram.initialPosition = go.Point.parse(pos);
+}
+
+
+
+
+
+
+
+
+window.addEventListener('DOMContentLoaded', init);
+
+
+
+]]></client_script>
+<controller_as>c</controller_as>
+<css/>
+<data_table>sp_instance</data_table>
+<demo_data/>
+<description/>
+<docs display_value=""/>
+<field_list/>
+<has_preview>true</has_preview>
+<id>csdm_builder</id>
+<internal>false</internal>
+<link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+<name>csdm_builder</name>
+<option_schema/>
+<public>false</public>
+<roles/>
+<script><![CDATA[(function() {	
+	
+	
+// UPDATE STATE IN csdm_jsons
+
+        
+        // The function provided in your first message
+        if (input.jsonState == "PUBLISHED") {
+            var gr = new GlideRecord('u_csdm_json');
+            gr.addQuery('u_name', input.dname);
+            gr.query();
+            if (gr.next()) {
+                gr.u_state = "PUBLISHED";
+                gr.update();
+            }
+        
+    
+
+	 
+	
+	
+	
+	}
+	// extract Diagrams state
+	
+var gr = new GlideRecord('u_csdm_json');
+gr.query();
+data.jsonstate={};
+	var j = 0;
+while (gr.next()) {
+	
+	var paramsObject = {};
+	
+
+	paramsObject.name=gr.getValue('u_name');
+	
+	paramsObject.state=gr.getValue('u_state');
+
+	
+	data.jsonstate[j]=paramsObject;
+	
+	 j += 1;
+
+	
+}
+	//delete node
+	
+if (input.deleteRelations) {
+  for (var i = 0; i < input.deleteRelations.length; i++) {
+    var parentSysId = input.deleteRelations[i].parentSysId;
+    var childSysId = input.deleteRelations[i].childSysId;
+    gs.info('Deleting relation: parentSysId=' + parentSysId + ', childSysId=' + childSysId);
+
+    if (parentSysId && childSysId) {
+      var relGR = new GlideRecord('cmdb_rel_ci');
+      relGR.addQuery('parent', parentSysId);
+      relGR.addQuery('child', childSysId);
+      relGR.query();
+
+      if (relGR.next()) {
+        gs.info('Found relation with sys_id: ' + relGR.sys_id);
+        relGR.deleteRecord();
+        gs.info('Deleted relation with sys_id: ' + relGR.sys_id);
+      } else {
+        gs.info('Relation not found with parentSysId=' + parentSysId + ', childSysId=' + childSysId);
+      }
+    }
+  }
+}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+//to extract link type sysid
+	
+if (input.linktype)	{
+	
+	
+    var gr = new GlideRecord('cmdb_rel_type');
+    gr.addQuery('parent_descriptor', input.linktype);
+    gr.query();
+	   if (gr.next()) {
+      data.lsysid= gr.getUniqueValue();
+    } 
+	
+
+	
+	
+	
+}
+	
+	
+	
+//for mapping all nodes 
+	function createOrUpdateRecord(tableName, description) {
+    var gr = new GlideRecord(tableName);
+    gr.addQuery('name', description);
+    gr.query();
+    if (gr.next()) {
+        // Record with the same description already exists, update it if necessary
+        // gr.name = description;
+        // gr.update();
+    } else {
+        // No record with the same description exists, create a new one
+        gr.initialize();
+        gr.name = description;
+        gr.insert();
+    }
+    return gr.getUniqueValue();
+}
+
+
+	if (input.elements){
+
+		for (var i=0;i<input.elements.length;i++) {
+			
+var tableName;
+
+        switch (input.elements[i].title) {
+            case "Business Application":
+                tableName = "cmdb_ci_business_app";
+                break;
+
+            case "Business Capability":
+                tableName = "cmdb_ci_business_capability";
+                break;
+
+            case "Information Object":
+                tableName = "cmdb_ci_information_object";
+                break;
+
+            default:
+
+                tableName = null;
+        }
+
+        if (tableName) {
+            input.elements[i].sysid = createOrUpdateRecord(tableName, input.elements[i].Description);
+        }
+    }
+
+    data.message = input.elements;
+}
+	
+
+	
+
+	
+//for mapping all relations between nodes	
+	
+	 function relationshipExists(parent, type, child) {
+        var gr = new GlideRecord('cmdb_rel_ci');
+        gr.addQuery('parent', parent);
+        gr.addQuery('type', type);
+        gr.addQuery('child', child);
+        gr.query();
+        return gr.hasNext();
+    }
+
+
+
+		   if (input.nodelinking) {
+        for (var i = 0; i < input.nodelinking.length; i++) {
+            var grIn = new GlideRecord('cmdb_rel_ci');
+            grIn.initialize();
+            grIn.parent = input.nodelinking[i].parent;
+
+            if (input.nodelinking[i].type_name) {
+                var grLinkType = new GlideRecord('cmdb_rel_type');
+                grLinkType.addQuery('parent_descriptor', input.nodelinking[i].type_name);
+                grLinkType.query();
+                if (grLinkType.next()) {
+                    grIn.type = grLinkType.getUniqueValue();
+                }
+            }
+
+            grIn.child = input.nodelinking[i].child;
+
+            // Check if the relationship already exists before inserting
+            if (!relationshipExists(grIn.parent, grIn.type, grIn.child)) {
+                grIn.insert();
+            }
+        }
+    }
+	
+
+	
+
+	
+	
+	
+
+	
+//import	
+var gr = new GlideRecord('u_csdm_json');
+gr.query();
+data.params={};
+	var i = 0;
+while (gr.next()) {
+	
+	var paramsObject = {};
+	
+
+	paramsObject.sysid=gr.getValue('sys_id');
+	
+	paramsObject.name=gr.getValue('u_name');
+	
+		paramsObject.jsoncode=gr.getValue('u_json');
+	
+	data.params[i]=paramsObject;
+	
+	 i += 1;
+
+	
+}
+	
+// Delete node or update a Diagram
+	
+
+	
+	
+	
+	//export or sauvegarde
+if (input.textareaData && input.dname) {
+    var gr = new GlideRecord('u_csdm_json'); // Replace 'your_table_name' with the actual table name
+
+    // Query the table to find if a record with the given name exists
+    gr.addQuery('u_name', input.dname);
+    gr.query();
+
+    if (gr.next()) {
+        // If a record with the given name exists, update the JSON
+        gr.u_json = input.textareaData;
+        gr.update();
+    } else {
+        // If no record exists with the given name, insert a new record
+        gr.initialize();
+        gr.u_json = input.textareaData;
+        gr.u_name = input.dname;
+        gr.insert();
+    }
+}
+})();
+
+
+]]></script>
+<servicenow>false</servicenow>
+<sys_class_name>sp_widget</sys_class_name>
+<sys_created_by>admin</sys_created_by>
+<sys_created_on>2023-05-22 12:24:09</sys_created_on>
+<sys_id>65c2ec50970321105ad33341f053afd2</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_name>csdm_builder</sys_name>
+<sys_package display_value="Global" source="global">global</sys_package>
+<sys_policy/>
+<sys_scope display_value="Global">global</sys_scope>
+<sys_update_name>sp_widget_65c2ec50970321105ad33341f053afd2</sys_update_name>
+<sys_updated_by>admin</sys_updated_by>
+<sys_updated_on>2023-05-22 12:24:09</sys_updated_on>
+<template><![CDATA[
+  <html lang="en">
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <style>
+  .popup {
+  position: fixed;
+  top: 50%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  z-index: 999;
+   display: none;
+}
+
+.popup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+    
+    
+.btn {
+  
+  margin-right: 10px;
+    margin-top: 10px;
+  
+    }
+
+.popup li {
+  margin-bottom: 10px;
+}
+ 
+.small-popup {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  z-index: 1000;
+  display: none;
+   margin-top: 10px;
+}
+
+  
+  </style>
+</head>
+
+
+    <body>
+
+  <div id="sample">
+    <div style="width: 100%; display: flex; justify-content: space-between ; flex-direction: row-reverse" >
+      <div  id="myTree" style=" width: 190px; margin-right: 2px;  position: relative; -webkit-tap-highlight-color: rgba(255, 255, 255, 0); cursor: auto;"><canvas tabindex="0" width="154" height="927" style="Margin-left:400%; z-index: 2; user-select: none; touch-action: none; width: 103px; height: 618px; cursor: auto;">This text is displayed if your browser does not support the Canvas HTML element.</canvas><div style="position: absolute; overflow: auto; width: 103px; height: 618px; z-index: 1;"><div style="position: absolute; width: 1px; height: 1px;"></div></div></div>
+      <div id="myDiagramDiv" style="flex-grow: 1; height: 620px;  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); cursor: auto; font: bold 11pt Helvetica, Arial, sans-serif;"><canvas tabindex="0" width="1420" height="927" style="position: absolute; top: 0px; left: 0px; z-index: 2; user-select: none; touch-action: none; width: 947px; height: 618px; cursor: auto;">This text is displayed if your browser does not support the Canvas HTML element.</canvas><div style="position: absolute; overflow: auto; width: 947px; height: 618px; z-index: 1;"><div style="position: absolute; width: 1px; height: 1px;"></div></div></div>
+    </div>
+    
+<div class="popup" id="myPopup"><div class="alert alert-success" role="alert">
+  The CSDM table contains the following saved diagrams :
+  
+ 
+</div>
+  <ul id="nameList">
+<button ng-repeat="approval in data.params" ng-click="showjson(approval.jsoncode,approval.name)" class="btn" ng-mouseover="showSmallPopup($event, approval.name)" ng-mouseleave="hideSmallPopup($event)">{{approval.name}}</button>
+
+<div ng-style="{'color': stateColor}" class="small-popup" id="smallPopup" >{{popupContent}}</div>
+
+  </ul>
+</div>
+    
+      <div>
+        
+        <button type="button"  class="btn" id="Drafts" ng-click="Drafts()">Drafts</button>
+        <button type="button" class="btn" id="Sauvegarde" ng-click="Sauvegarde()">Sauvegarde as a Draft</button>
+
+                <button type="button" class="btn" ng-click="SauvegardeAndUpdateCi()">Publish</button>
+        <button type="button" class="btn" id="SaveButton" onclick="save();">Save</button>
+
+
+
+        <button type="button" class="btn" onclick="load()">Load</button>
+
+        
+        
+        Diagram Model saved in JSON format:
+      </div>
+      <textarea id="mySavedModel" style="width:100%;height:300px">{ "class": "go.GraphLinksModel",
+    "linkFromPortIdProperty": "fromPort",
+    "linkToPortIdProperty": "toPort",
+    "nodeDataArray": [
+   ],
+    "linkDataArray": []}
+      </textarea>
+    </div>
+      
+
+      
+
+    </body>
+    </html>]]></template>
+</sp_widget>
+</unload>
